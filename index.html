@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>InflowSky স্ট্যাক সার্ভে — স্যার বেছে নিন</title>
+<meta name="theme-color" content="#0f172a">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#0f172a;color:#e2e8f0;font-family:"Noto Sans Bengali",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px 104px}
+header{position:sticky;top:0;background:#0f172a;padding:12px 0 10px;z-index:5;border-bottom:1px solid #1e293b}
+h1{font-size:19px;margin:0 0 2px}
+.sub{font-size:13px;color:#94a3b8;margin:0 0 10px}
+.bar{height:8px;background:#1e293b;border-radius:99px;overflow:hidden}
+.fill{height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#34d399);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:12px;color:#94a3b8;margin-top:6px}
+.legend{background:#132b3d;border:1px solid #1e4b63;border-radius:12px;padding:11px 12px;font-size:13px;color:#bae6fd;margin:14px 0}
+.sec{margin:26px 0 10px;font-size:15px;font-weight:700;color:#38bdf8;display:flex;align-items:center;gap:8px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:14px;margin-bottom:12px}
+.qn{font-size:12px;color:#64748b;margin-bottom:4px}
+.q{font-size:15px;font-weight:600;margin-bottom:10px}
+.opt{display:block;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:11px 12px;margin-bottom:8px;font-size:14px;cursor:pointer}
+.opt:active{background:#334155}
+.opt input{margin-right:9px;accent-color:#38bdf8;vertical-align:middle}
+.opt.sel{border-color:#38bdf8;background:#0b2b40}
+.star{color:#fbbf24;font-weight:700}
+input[type=text],textarea{width:100%;background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:10px;padding:11px;font-size:14px;font-family:inherit}
+textarea{min-height:72px;resize:vertical}
+.scale{display:flex;gap:8px}
+.scale button{flex:1;background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:10px;padding:12px 0;font-size:15px;font-weight:700;cursor:pointer}
+.scale button.sel{background:#38bdf8;color:#0f172a;border-color:#38bdf8}
+.ends{display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-top:6px}
+.foot{position:fixed;left:0;right:0;bottom:0;background:#0f172a;border-top:1px solid #334155;padding:10px 16px;display:flex;gap:8px;max-width:640px;margin:0 auto;z-index:6}
+.foot button{flex:1;border:0;border-radius:12px;padding:14px 6px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer}
+.prev{background:#334155;color:#e2e8f0;flex:.8}
+.next{background:#38bdf8;color:#0f172a;flex:1.1}
+.copy{background:#34d399;color:#062018;flex:1.1}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#34d399;color:#062018;padding:10px 16px;border-radius:99px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;z-index:7;text-align:center;max-width:90%}
+.toast.on{opacity:1}
+.done{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:18px;margin-top:20px;font-size:14px}
+.done b{color:#34d399}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>🧱 InflowSky স্ট্যাক সার্ভে</h1>
+  <p class="sub">৫ বছরের অ্যাপ কী দিয়ে বানাব — ২১টি প্রশ্ন</p>
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div class="meta"><span id="counter">১ / ২১</span><span id="pct">০%</span></div>
+</header>
+
+<div class="legend">
+  <span class="star">⭐</span> চিহ্ন যেটায়, সেটা আমার <b>সুপারিশ</b> — কিন্তু চূড়ান্ত সিদ্ধান্ত স্যারের।
+  যেকোনো প্রশ্ন বাদ দিতে পারেন, শেষে <b>📋 সব কপি</b> চাপলেই সব একসাথে কপি হবে — Telegram-এ পেস্ট করে পাঠিয়ে দিলেই হবে।
+</div>
+
+<div id="stage"></div>
+<div class="done" id="done" style="display:none">
+  <b>✅ সব উত্তর হয়ে গেছে!</b><br>
+  নিচের সবুজ <b>📋 সব কপি</b> বাটনে চাপ দিন — তারপর Telegram-এ পেস্ট করে পাঠিয়ে দিন।
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="foot">
+  <button class="prev" id="prev">◀ আগের</button>
+  <button class="copy" id="copy">📋 সব কপি</button>
+  <button class="next" id="next">পরের ▶</button>
+</div>
+
+<script>
+const SECTIONS = [
+  {"key":"fe","name":"ফ্রন্টএন্ড — যা দেখবেন ও ছোঁবেন","icon":"🎨"},
+  {"key":"ds","name":"ডিজাইন সিস্টেম — চেহারা","icon":"🖌️"},
+  {"key":"be","name":"ব্যাকএন্ড — অ্যাপের মগজ","icon":"⚙️"},
+  {"key":"db","name":"ডেটাবেস — সব তথ্য","icon":"🗄️"},
+  {"key":"au","name":"লগইন ও অনুমতি — নিরাপত্তা","icon":"🔐"},
+  {"key":"ho","name":"হোস্টিং ও ফাইল — কোথায় চলবে","icon":"☁️"},
+  {"key":"ln","name":"ভাষা, ডোমেইন ও প্রথম কাজ","icon":"🌐"}
+];
+const QUESTIONS = [
+  {"id":1,"sec":"fe","q":"ফ্রন্টএন্ড (ইউজার যা দেখবে ও ছোঁবে) কোনটা হবে?","type":"one","opts":["⭐ Next.js (React)","SvelteKit","Astro","স্যার/এজেন্ট ঠিক করে দিন"],"lo":null,"hi":null,"ph":null},
+  {"id":2,"sec":"fe","q":"ফ্রন্টএন্ডে আর কী কী জরুরি? (যতগুলো চান)","type":"many","opts":["📱 মোবাইল-ফার্স্ট (ফোন আগে)","🌙 ডার্ক মোড","🔤 পরিষ্কার বাংলা ফন্ট","📲 PWA (ফোনে অ্যাপের মতো ইনস্টল)","⚡ খুব দ্রুত লোড"],"lo":null,"hi":null,"ph":null},
+
+  {"id":3,"sec":"ds","q":"ডিজাইন সিস্টেম (কম্পোনেন্ট/রঙের নিয়ম) কোনটা?","type":"one","opts":["⭐ Tailwind CSS + shadcn/ui","Material UI (MUI)","নিজে বানানো CSS","স্যার/এজেন্ট ঠিক করে দিন"],"lo":null,"hi":null,"ph":null},
+  {"id":4,"sec":"ds","q":"প্রধান রঙ (brand color) কোনটা পছন্দ?","type":"one","opts":["নীল","সবুজ","পার্পল","কালো-সাদা (মিনিমাল)","ছবি/লোগো পাঠাব, সেটা দেখে ঠিক হবে"],"lo":null,"hi":null,"ph":null},
+  {"id":5,"sec":"ds","q":"কার্ড/বাটনের কোণা কেমন হবে?","type":"one","opts":["গোল (গোলগাল)","একটু কোণা","একদম সোজা কোণা","যা সবচেয়ে ভালো দেখায়"],"lo":null,"hi":null,"ph":null},
+
+  {"id":6,"sec":"be","q":"ব্যাকএন্ড (নিয়ম ও হিসাব) কোনটা?","type":"one","opts":["⭐ Cloudflare Workers + Hono","Next.js server actions","আলাদা Node/Go সার্ভার (VPS)","স্যার/এজেন্ট ঠিক করে দিন"],"lo":null,"hi":null,"ph":null},
+  {"id":7,"sec":"be","q":"অ্যাপের মাপ এখন কেমন হবে?","type":"one","opts":["ছোট/শখের (আমি আর কয়েকজন)","ধীরে ধীরে বড় হবে","এখনই বড় (হাজার হাজার ইউজার)","জানি না"],"lo":null,"hi":null,"ph":null},
+
+  {"id":8,"sec":"db","q":"ডেটাবেস (সব তথ্য যেখানে থাকবে) কোনটা?","type":"one","opts":["⭐ PostgreSQL (Supabase)","Cloudflare D1","MongoDB","স্যার/এজেন্ট ঠিক করে দিন"],"lo":null,"hi":null,"ph":null},
+  {"id":9,"sec":"db","q":"কোন তথ্যগুলো সবচেয়ে জরুরি রাখা? (যতগুলো চান)","type":"many","opts":["👤 ছাত্র/ইউজার","📚 কোর্স/পড়া","❓ প্রশ্ন ও উত্তর","📊 ফলাফল ও অগ্রগতি","💳 পেমেন্ট","🔔 নোটিশ"],"lo":null,"hi":null,"ph":null},
+  {"id":10,"sec":"db","q":"ব্যাকআপ কত ঘন ঘন নেব?","type":"one","opts":["প্রতিদিন","সপ্তাহে একবার","মাসে একবার","যতটা ফ্রি-তে সম্ভব"],"lo":null,"hi":null,"ph":null},
+
+  {"id":11,"sec":"au","q":"ইউজার কী দিয়ে লগইন করবে? (যতগুলো চান)","type":"many","opts":["✉️ ইমেইল + পাসওয়ার্ড","🔵 Google দিয়ে","📘 Facebook দিয়ে","📱 ফোন নম্বর (OTP)"],"lo":null,"hi":null,"ph":null},
+  {"id":12,"sec":"au","q":"লগইন/auth কে সামলাবে?","type":"one","opts":["⭐ Supabase Auth","Auth.js (NextAuth)","Clerk","স্যার/এজেন্ট ঠিক করে দিন"],"lo":null,"hi":null,"ph":null},
+  {"id":13,"sec":"au","q":"কে কী দেখতে পারবে? (ভূমিকা — যতগুলো চান)","type":"many","opts":["🧑‍🎓 ছাত্র","👨‍🏫 শিক্ষক","👨‍👩‍👦 অভিভাবক","🛡️ অ্যাডমিন"],"lo":null,"hi":null,"ph":null},
+
+  {"id":14,"sec":"ho","q":"হোস্টিং (অ্যাপ কোথায় চলবে) কোনটা?","type":"one","opts":["⭐ Cloudflare + Supabase","Vercel","নিজের VPS সার্ভার","স্যার/এজেন্ট ঠিক করে দিন"],"lo":null,"hi":null,"ph":null},
+  {"id":15,"sec":"ho","q":"ছবি/ভিডিও/ফাইল কোথায় রাখব?","type":"one","opts":["⭐ Cloudflare R2","Supabase Storage","ভিডিও লাগবে না / লিংক দিলেই হবে","জানি না"],"lo":null,"hi":null,"ph":null},
+  {"id":16,"sec":"ho","q":"খরচ নিয়ে আপনার নিয়ম কী?","type":"one","opts":["অবশ্যই ফ্রি থাকতে হবে","ফ্রি, তবে দরকারে অল্প টাকা চলবে","মাসে ৫০০–২০০০ টাকা পর্যন্ত চলবে","বড় হলে যত লাগে লাগুক"],"lo":null,"hi":null,"ph":null},
+
+  {"id":17,"sec":"ln","q":"অ্যাপে কোন কোন ভাষা থাকবে? (যতগুলো চান)","type":"many","opts":["🇧🇩 বাংলা","🇬🇧 ইংরেজি","🇸🇦 আরবি","শুধু বাংলা হলেই হবে"],"lo":null,"hi":null,"ph":null},
+  {"id":18,"sec":"ln","q":"ডোমেইন (নিজের নাম) এখনই কিনব?","type":"one","opts":["হ্যাঁ, এখনই","পরে, অ্যাপ হলে","স্যার/এজেন্ট ঠিক করে দিন","ডোমেইন লাগবে না"],"lo":null,"hi":null,"ph":null},
+  {"id":19,"sec":"ln","q":"সব মিলিয়ে এই স্ট্যাক-সুপারিশ ঠিক আছে? (১ = না, ৫ = একদম ঠিক)","type":"scale","opts":null,"lo":"না, বদলাতে চাই","hi":"একদম ঠিক আছে","ph":null},
+  {"id":20,"sec":"ln","q":"কিছু বদলাতে চাইলে লিখুন (না চাইলে খালি রাখুন)","type":"text","opts":null,"lo":null,"hi":null,"ph":"যেমন: ডেটাবেস অন্য কিছু দিতে চাই"},
+  {"id":21,"sec":"ln","q":"প্রথম কাজ কোনটা হোক?","type":"one","opts":["🖌️ আগে ডিজাইন/ছবি দেখে নেওয়া","🗄️ ডেটাবেস + লগইন আগে","🧪 একটা ছোট পাতা বানিয়ে দেখা","স্যার বলবেন"],"lo":null,"hi":null,"ph":null}
+];
+const KEY = "inflowsky_stack_survey_v1";
+const BN = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+const bn = n => String(n).replace(/\d/g, d => BN[+d]);
+let state = load();
+let idx = state.last || 0;
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || blank(); }catch(e){ return blank(); } }
+function blank(){ return { answers:{}, last:0 }; }
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+const $ = id => document.getElementById(id);
+const stage = $("stage");
+function answered(q){
+  const v = state.answers[q.id];
+  if (v === undefined || v === null) return false;
+  if (Array.isArray(v)) return v.length > 0;
+  return String(v).trim() !== "";
+}
+function progress(){
+  const n = QUESTIONS.filter(answered).length;
+  $("counter").textContent = bn(idx+1) + " / " + bn(QUESTIONS.length);
+  $("pct").textContent = bn(Math.round(n/QUESTIONS.length*100)) + "%";
+  $("fill").style.width = (n/QUESTIONS.length*100) + "%";
+}
+function render(){
+  const q = QUESTIONS[idx];
+  let html = "";
+  if (!idx || QUESTIONS[idx-1].sec !== q.sec){
+    const s = SECTIONS.find(x => x.key === q.sec);
+    html += '<div class="sec">' + s.icon + " " + s.name + "</div>";
+  }
+  html += '<div class="card"><div class="qn">প্রশ্ন ' + bn(q.id) + '</div>';
+  html += '<div class="q">' + q.q + "</div>";
+  const v = state.answers[q.id];
+  if (q.type === "one"){
+    q.opts.forEach((o,i) => {
+      const on = v === o ? " sel" : "";
+      const label = o.replace("⭐ ", '<span class="star">⭐</span> ');
+      html += '<label class="opt'+on+'"><input type="radio" name="a" '+(v===o?"checked":"")+' data-v="'+i+'">'+label+"</label>";
+    });
+  } else if (q.type === "many"){
+    q.opts.forEach((o,i) => {
+      const arr = Array.isArray(v) ? v : [];
+      const on = arr.includes(o) ? " sel" : "";
+      html += '<label class="opt'+on+'"><input type="checkbox" data-v="'+i+'" '+(arr.includes(o)?"checked":"")+'>'+o+"</label>";
+    });
+  } else if (q.type === "scale"){
+    html += '<div class="scale">';
+    for (let i=1;i<=5;i++){
+      html += '<button data-v="'+i+'" class="'+(v==i?"sel":"")+'">'+bn(i)+"</button>";
+    }
+    html += "</div>";
+    html += '<div class="ends"><span>'+q.lo+"</span><span>"+q.hi+"</span></div>";
+  } else {
+    html += '<input type="text" id="txt" placeholder="'+(q.ph||"")+'" value="'+((v&&v.replace)?v.replace(/"/g,"&quot;"):"")+'">';
+  }
+  html += "</div>";
+  stage.innerHTML = html;
+  bind();
+  progress();
+  $("prev").style.opacity = idx ? 1 : .4;
+  $("done").style.display = (QUESTIONS.filter(answered).length === QUESTIONS.length) ? "block" : "none";
+}
+function bind(){
+  const q = QUESTIONS[idx];
+  if (q.type === "one"){
+    stage.querySelectorAll('input[type=radio]').forEach(el => {
+      el.onchange = () => { state.answers[q.id] = q.opts[+el.dataset.v]; save(); render(); };
+    });
+  } else if (q.type === "many"){
+    stage.querySelectorAll('input[type=checkbox]').forEach(el => {
+      el.onchange = () => {
+        const o = q.opts[+el.dataset.v];
+        let arr = Array.isArray(state.answers[q.id]) ? state.answers[q.id] : [];
+        arr = el.checked ? arr.concat([o]) : arr.filter(x => x !== o);
+        state.answers[q.id] = arr; save(); render();
+      };
+    });
+  } else if (q.type === "scale"){
+    stage.querySelectorAll(".scale button").forEach(b => {
+      b.onclick = () => { state.answers[q.id] = +b.dataset.v; save(); render(); };
+    });
+  } else {
+    const t = $("txt");
+    if (t) t.oninput = () => { state.answers[q.id] = t.value; save(); progress(); };
+  }
+}
+function buildText(){
+  const lines = ["🧱 ইনফ্লোস্কাই স্ট্যাক সার্ভে — আমার উত্তর"];
+  SECTIONS.forEach(s => {
+    lines.push("");
+    lines.push(s.icon + " " + s.name);
+    QUESTIONS.filter(q => q.sec === s.key).forEach(q => {
+      let a = state.answers[q.id];
+      if (Array.isArray(a)) a = a.join(", ");
+      lines.push(bn(q.id) + ". " + q.q);
+      lines.push("   ➜ " + (a && String(a).trim() ? a : "(খালি)"));
+    });
+  });
+  const n = QUESTIONS.filter(answered).length;
+  lines.push("");
+  lines.push("(উত্তর দেওয়া হয়েছে " + bn(n) + " / " + bn(QUESTIONS.length) + "টি প্রশ্নের)");
+  return lines.join("\n");
+}
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("on");
+  setTimeout(() => t.classList.remove("on"), 1800);
+}
+async function copyAll(){
+  const t = $("txt");
+  if (t) { state.answers[QUESTIONS[idx].id] = t.value; save(); }
+  const text = buildText();
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("সব উত্তর কপি হয়েছে ✅ Telegram-এ পেস্ট করে পাঠান");
+  } catch (e) {
+    window.prompt("কপি করুন (Ctrl/Cmd+C):", text);
+  }
+}
+$("prev").onclick = () => { if (idx > 0){ idx--; state.last = idx; save(); render(); } };
+$("next").onclick = () => {
+  const t = $("txt");
+  if (t) { state.answers[QUESTIONS[idx].id] = t.value; save(); }
+  if (idx < QUESTIONS.length - 1){ idx++; state.last = idx; save(); render(); }
+  else { copyAll(); }
+};
+$("copy").onclick = copyAll;
+render();
+</script>
+</body>
+</html>
